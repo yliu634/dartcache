@@ -54,7 +54,7 @@ _msg_get(void)
         goto done;
     }
 
-    msg = fc_alloc(sizeof(*msg));
+    msg = (struct msg *) fc_alloc(sizeof(*msg));
     if (msg == NULL) {
         return NULL;
     }

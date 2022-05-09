@@ -26,7 +26,7 @@ array_create(uint32_t n, size_t size)
 
     ASSERT(n != 0 && size != 0);
 
-    a = fc_alloc(sizeof(*a));
+    a = (struct array *) fc_alloc(sizeof(*a));
     if (a == NULL) {
         return NULL;
     }
@@ -86,8 +86,8 @@ array_idx(struct array *a, void *elem)
 
     ASSERT(elem >= a->elem);
 
-    p = a->elem;
-    q = elem;
+    p = (uint8_t *) a->elem;
+    q = (uint8_t *) elem;
     off = (uint32_t)(q - p);
 
     ASSERT(off % (uint32_t)a->size == 0);

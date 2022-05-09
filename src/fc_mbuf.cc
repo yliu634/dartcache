@@ -43,7 +43,7 @@ _mbuf_get(void)
         goto done;
     }
 
-    buf = fc_alloc(mbuf_chunk_size);
+    buf = (uint8_t *) fc_alloc(mbuf_chunk_size);
     if (buf == NULL) {
         return NULL;
     }

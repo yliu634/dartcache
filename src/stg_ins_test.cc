@@ -187,7 +187,7 @@ int get(char* key, int nkey, char* value){
     return 0;
 }
 
-int delete(char* key, int nkey){
+int delete_test(char* key, int nkey){
     uint8_t  md[20];
     uint32_t hash;
     uint8_t * tmp_key = key;
@@ -299,7 +299,7 @@ int main(int argc, char** argv){
     if (get(key, 5, ret) == 0){
         printf("get data %s\n", ret);
     }
-    delete(key, 5);
+    delete_test(key, 5);
     if (get(key, 5, ret) == 1){
         printf("delete no data\n");
     }

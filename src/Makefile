@@ -89,7 +89,7 @@ POST_UNINSTALL = :
 build_triplet = x86_64-pc-linux-gnu
 host_triplet = x86_64-pc-linux-gnu
 target_triplet = x86_64-pc-linux-gnu
-bin_PROGRAMS = fatcache$(EXEEXT)
+bin_PROGRAMS = fatcache$(EXEEXT) stg_ins_test$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -112,6 +112,11 @@ am_fatcache_OBJECTS = fc_core.$(OBJEXT) fc_connection.$(OBJEXT) \
 	fc_util.$(OBJEXT) fc_stats.$(OBJEXT) fc.$(OBJEXT)
 fatcache_OBJECTS = $(am_fatcache_OBJECTS)
 fatcache_LDADD = $(LDADD)
+am_stg_ins_test_OBJECTS = fc_slab.$(OBJEXT) fc_item.$(OBJEXT) \
+	fc_itemx.$(OBJEXT) fc_time.$(OBJEXT) fc_sha1.$(OBJEXT) \
+	fc_log.$(OBJEXT) fc_util.$(OBJEXT) stg_ins_test.$(OBJEXT)
+stg_ins_test_OBJECTS = $(am_stg_ins_test_OBJECTS)
+stg_ins_test_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -153,8 +158,8 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(fatcache_SOURCES)
-DIST_SOURCES = $(fatcache_SOURCES)
+SOURCES = $(fatcache_SOURCES) $(stg_ins_test_SOURCES)
+DIST_SOURCES = $(fatcache_SOURCES) $(stg_ins_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -181,12 +186,12 @@ ETAGS = etags
 CTAGS = ctags
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/config/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/yiliu/bb/fatcache/config/missing aclocal-1.15
+ACLOCAL = ${SHELL} /home/yiliu/build/fatcache/config/missing aclocal-1.15
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /home/yiliu/bb/fatcache/config/missing autoconf
-AUTOHEADER = ${SHELL} /home/yiliu/bb/fatcache/config/missing autoheader
-AUTOMAKE = ${SHELL} /home/yiliu/bb/fatcache/config/missing automake-1.15
+AUTOCONF = ${SHELL} /home/yiliu/build/fatcache/config/missing autoconf
+AUTOHEADER = ${SHELL} /home/yiliu/build/fatcache/config/missing autoheader
+AUTOMAKE = ${SHELL} /home/yiliu/build/fatcache/config/missing automake-1.15
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -195,7 +200,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -fPIC -fpermissive --std=c++98
+CXXFLAGS = -fPIC -fpermissive #--std=c++98
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -214,7 +219,7 @@ LDFLAGS =  -rdynamic
 LIBOBJS = 
 LIBS = -lpthread 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/yiliu/bb/fatcache/config/missing makeinfo
+MAKEINFO = ${SHELL} /home/yiliu/build/fatcache/config/missing makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = fatcache
@@ -229,10 +234,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1.1
-abs_builddir = /home/yiliu/bb/fatcache/src
-abs_srcdir = /home/yiliu/bb/fatcache/src
-abs_top_builddir = /home/yiliu/bb/fatcache
-abs_top_srcdir = /home/yiliu/bb/fatcache
+abs_builddir = /home/yiliu/build/fatcache/src
+abs_srcdir = /home/yiliu/build/fatcache/src
+abs_top_builddir = /home/yiliu/build/fatcache
+abs_top_srcdir = /home/yiliu/build/fatcache
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -260,7 +265,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/yiliu/bb/fatcache/config/install-sh
+install_sh = ${SHELL} /home/yiliu/build/fatcache/config/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -405,6 +410,10 @@ fatcache$(EXEEXT): $(fatcache_OBJECTS) $(fatcache_DEPENDENCIES) $(EXTRA_fatcache
 	@rm -f fatcache$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(fatcache_OBJECTS) $(fatcache_LDADD) $(LIBS)
 
+stg_ins_test$(EXEEXT): $(stg_ins_test_OBJECTS) $(stg_ins_test_DEPENDENCIES) $(EXTRA_stg_ins_test_DEPENDENCIES) 
+	@rm -f stg_ins_test$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(stg_ins_test_OBJECTS) $(stg_ins_test_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -433,6 +442,7 @@ include ./$(DEPDIR)/fc_stats.Po
 include ./$(DEPDIR)/fc_string.Po
 include ./$(DEPDIR)/fc_time.Po
 include ./$(DEPDIR)/fc_util.Po
+include ./$(DEPDIR)/stg_ins_test.Po
 
 .cc.o:
 	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

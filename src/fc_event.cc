@@ -37,7 +37,7 @@ event_init(struct context *ctx, int size)
         return -1;
     }
 
-    event = fc_calloc(ctx->nevent, sizeof(*ctx->event));
+    event = (struct epoll_event *) fc_calloc(ctx->nevent, sizeof(*ctx->event));
     if (event == NULL) {
         status = close(ep);
         if (status < 0) {
