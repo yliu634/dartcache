@@ -2,7 +2,7 @@ bin_PROGRAMS = fatcache #stg_ins_test
 
 AM_CPPFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS = -g 
-CXXFLAGS = -fPIC -fpermissive
+CXXFLAGS = -fPIC -fpermissive --std=c++98
 AM_CFLAGS = -Wall
 AM_CFLAGS += -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 AM_CFLAGS += -fno-strict-aliasing
