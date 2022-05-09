@@ -19,7 +19,7 @@
 #define _FC_UTIL_H_
 
 #include <stdarg.h>
-
+#include <sys/uio.h>
 #define LF              (uint8_t) 10
 #define CR              (uint8_t) 13
 #define CRLF            "\r\n"
@@ -93,6 +93,7 @@
  * These wrappers enables us to loosely detect double free, dangling
  * pointer access and zero-byte alloc.
  */
+
 #define fc_alloc(_s)                    \
     _fc_alloc((size_t)(_s), __FILE__, __LINE__)
 
@@ -166,6 +167,7 @@ rstatus_t fc_device_size(const char *path, size_t *size);
  * Wrappers to read or write data to/from (multiple) buffers
  * to a file or socket descriptor.
  */
+extern "C" {
 #define fc_read(_d, _b, _n)     \
     read(_d, _b, (size_t)(_n))
 
@@ -177,7 +179,7 @@ rstatus_t fc_device_size(const char *path, size_t *size);
 
 #define fc_writev(_d, _b, _n)   \
     writev(_d, _b, (int)(_n))
-
+}
 /*
  * Wrappers around strtoull, strtoll, strtoul, strtol that are safer and
  * easier to use. Returns true if conversion succeeds.

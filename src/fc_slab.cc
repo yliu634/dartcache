@@ -313,7 +313,7 @@ _slab_drain(void)
     ASSERT(!dsinfo->mem);
 
     /* drain the memory to disk slab */
-    slab = slab_from_maddr(msinfo->addr, true);
+    slab = (struct slab *) slab_from_maddr(msinfo->addr, true);
     size = settings.slab_size;
     off = slab_to_daddr(dsinfo);
     n = pwrite(fd, slab, size, off);
@@ -379,7 +379,7 @@ _slab_get_item(uint8_t cid)
     ASSERT(!TAILQ_EMPTY(&c->partial_msinfoq));
     sinfo = TAILQ_FIRST(&c->partial_msinfoq);
     ASSERT(!slab_full(sinfo));
-    slab = slab_from_maddr(sinfo->addr, true);
+    slab = (struct slab *) slab_from_maddr(sinfo->addr, true);
 
     /* consume an item from partial slab */
     it = slab_to_item(slab, sinfo->nalloc, c->size, false);
@@ -441,7 +441,7 @@ slab_get_item(uint8_t cid)
         ASSERT(sinfo->mem == 1);
 
         /* init slab of partial sinfo */
-        slab = slab_from_maddr(sinfo->addr, false);
+        slab = (struct slab *) slab_from_maddr(sinfo->addr, false);
         slab->magic = SLAB_MAGIC;
         slab->cid = cid;
         /* unused[] is left uninitialized */
@@ -527,7 +527,7 @@ slab_init_ctable(void)
 
     profile = settings.profile;
     nctable = settings.profile_last_id + 1;
-    ctable = fc_alloc(sizeof(*ctable) * nctable);
+    ctable = (struct slabclass *) fc_alloc(sizeof(*ctable) * nctable);
     if (ctable == NULL) {
         return FC_ENOMEM;
     }
@@ -559,7 +559,7 @@ slab_init_stable(void)
     uint32_t i, j;
 
     nstable = nmslab + ndslab;
-    stable = fc_alloc(sizeof(*stable) * nstable);
+    stable = (struct slabinfo *) fc_alloc(sizeof(*stable) * nstable);
     if (stable == NULL) {
         return FC_ENOMEM;
     }
@@ -654,7 +654,7 @@ slab_init(void)
     /* init nmslab, mstart and mend */
     nmslab = MAX(nctable, settings.max_slab_memory / settings.slab_size);
     mspace = nmslab * settings.slab_size;
-    mstart = fc_mmap(mspace);
+    mstart = (uint8_t*) fc_mmap(mspace);
     if (mstart == NULL) {
         log_error("mmap %zu bytes failed: %s", mspace, strerror(errno));
         return FC_ENOMEM;
@@ -687,7 +687,7 @@ slab_init(void)
     }
 
     /* init evictbuf and readbuf */
-    evictbuf = fc_mmap(settings.slab_size);
+    evictbuf = (uint8_t*) fc_mmap(settings.slab_size);
     if (evictbuf == NULL) {
         log_error("mmap %zu bytes failed: %s", settings.slab_size,
                   strerror(errno));
@@ -695,7 +695,7 @@ slab_init(void)
     }
     memset(evictbuf, 0xff, settings.slab_size);
 
-    readbuf = fc_mmap(settings.slab_size);
+    readbuf = (uint8_t*) fc_mmap(settings.slab_size);
     if (readbuf == NULL) {
         log_error("mmap %zu bytes failed: %s", settings.slab_size,
                   strerror(errno));

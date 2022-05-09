@@ -110,7 +110,7 @@ conn_sendv(struct conn *conn, struct array *sendv, size_t nsend)
     ASSERT(conn->send_ready);
 
     for (;;) {
-        n = fc_writev(conn->sd, sendv->elem, sendv->nelem);
+        n = fc_writev(conn->sd, (const iovec*)sendv->elem, sendv->nelem);
 
         log_debug(LOG_VERB, "sendv on sd %d %zd of %zu in %"PRIu32" buffers",
                   conn->sd, n, nsend, sendv->nelem);
@@ -179,7 +179,7 @@ _conn_get(void)
         nfree_connq--;
         TAILQ_REMOVE(&free_connq, conn, tqe);
     } else {
-        conn = fc_alloc(sizeof(*conn));
+        conn = (struct conn *)fc_alloc(sizeof(*conn));
         if (conn == NULL) {
             return NULL;
         }

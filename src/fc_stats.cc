@@ -22,15 +22,15 @@
 
 static stats_info st_info;
 static stats_info sc_st_info[SLABCLASS_MAX_ID+1];
-struct settings settings;
+extern struct settings settings;
 
 buffer *
 stats_alloc_buffer(int n)
 {
     if (n <= 0) n = 128;
 
-    buffer *buf = fc_alloc(sizeof(*buf));
-    buf->data = fc_alloc(n);
+    buffer *buf = (buffer *) fc_alloc(sizeof(*buf));
+    buf->data = (uint8_t *) fc_alloc(n);
     buf->nused = 0;
     buf->nalloc = n;
     return buf;
@@ -49,7 +49,7 @@ static void
 _stats_append(buffer *buf, uint8_t cid, const char *key, int nkey, const char *val, int nval)
 {
     int n, new_size, avail, bytes = 0;
-    uint8_t *new;
+    uint8_t *newg;
     
     if (!buf) {
         return;
@@ -57,16 +57,16 @@ _stats_append(buffer *buf, uint8_t cid, const char *key, int nkey, const char *v
 
     n = nkey + nval + 14; // +14 for "STAT :class \r\n"
     if (!buf->data) {
-        buf->data = fc_alloc(n);
+        buf->data = (uint8_t *) fc_alloc(n);
         buf->nused = 0;
         buf->nalloc = n;
     } else if (buf->nalloc - buf->nused < n) {
         new_size = buf->nalloc > n ? buf->nalloc * 2 :  buf->nalloc + 2 * n;
-        new = fc_realloc(buf->data, new_size);
-        if (new == NULL) {
+        newg = (uint8_t *) fc_realloc(buf->data, new_size);
+        if (newg == NULL) {
             return;
         }
-        buf->data = new;
+        buf->data = newg;
         buf->nalloc = new_size;
     }
 

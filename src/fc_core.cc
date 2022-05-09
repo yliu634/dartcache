@@ -212,7 +212,7 @@ core_loop(struct context *ctx)
     for (i = 0; i < nsd; i++) {
         struct epoll_event *ev = &ctx->event[i];
 
-        core_core(ctx, ev->data.ptr, ev->events);
+        core_core(ctx, (conn*)ev->data.ptr, ev->events);
     }
 
     return FC_OK;

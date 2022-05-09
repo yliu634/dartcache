@@ -100,19 +100,19 @@ array_idx(struct array *a, void *elem)
 void *
 array_push(struct array *a)
 {
-    void *elem, *new;
+    void *elem, *newg;
     size_t size;
 
     if (a->nelem == a->nalloc) {
 
         /* the array is full; allocate new array */
         size = a->size * a->nalloc;
-        new = fc_realloc(a->elem, 2 * size);
-        if (new == NULL) {
+        newg = fc_realloc(a->elem, 2 * size);
+        if (newg == NULL) {
             return NULL;
         }
 
-        a->elem = new;
+        a->elem = newg;
         a->nalloc *= 2;
     }
 

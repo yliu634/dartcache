@@ -120,7 +120,7 @@ itemx_init(void)
 
     /* init item index table */
     nitx_table = HASHSIZE(settings.hash_power);
-    itx_table = fc_alloc(sizeof(*itx_table) * nitx_table);
+    itx_table = (struct itemx_tqh*) fc_alloc(sizeof(*itx_table) * nitx_table);
     if (itx_table == NULL) {
         return FC_ENOMEM;
     }
@@ -131,7 +131,7 @@ itemx_init(void)
     n = settings.max_index_memory / sizeof(struct itemx);
 
     /* init item index memory */
-    itx = fc_mmap(settings.max_index_memory);
+    itx = (struct itemx *) fc_mmap(settings.max_index_memory);
     if (itx == NULL) {
         return FC_ENOMEM;
     }

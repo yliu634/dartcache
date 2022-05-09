@@ -7,7 +7,7 @@ m4_define([FC_BUGS], [manj@twitter.com])
 # Initialize autoconf
 AC_PREREQ([2.64])
 AC_INIT([fatcache], [FC_MAJOR.FC_MINOR.FC_PATCH], [FC_BUGS])
-AC_CONFIG_SRCDIR([src/fc.c])
+AC_CONFIG_SRCDIR([src/fc.cc])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config.h:config.h.in])
 AC_CONFIG_MACRO_DIR([m4])
@@ -27,6 +27,7 @@ AC_LANG([C])
 
 # Checks for programs
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AM_PROG_CC_C_O

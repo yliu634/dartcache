@@ -262,7 +262,7 @@ fc_set_default_options(void)
     settings.verbose = FC_LOG_DEFAULT;
 
     settings.port = FC_PORT;
-    settings.addr = FC_ADDR;
+    settings.addr = (char *)FC_ADDR;
     settings.hash_power = FC_HASH_POWER;
 
     settings.factor = FC_FACTOR;

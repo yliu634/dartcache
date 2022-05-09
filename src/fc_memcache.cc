@@ -812,7 +812,7 @@ error:
 void
 memcache_pre_splitcopy(struct mbuf *mbuf, void *arg)
 {
-    struct msg *r = arg;                  /* request vector */
+    struct msg *r = (struct msg *) arg;                  /* request vector */
     struct string get = string("get ");   /* 'get ' string */
     struct string gets = string("gets "); /* 'gets ' string */
 
