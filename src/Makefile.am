@@ -33,7 +33,19 @@ fatcache_SOURCES =			\
 	fc_util.cc fc_util.h		\
 	fc_stats.cc fc_stats.h		\
 	fc_queue.h			\
-	fc.cc
+	fc.cc		\
+	common.h		\
+    cuckoo_ht.h		\
+    debugbreak.h		\
+    farmhash.h		\
+    farmhash.cc		\
+    hash2.h			\
+    hashutil.h		\
+    lfsr64.h		\
+    ludo_cp_dp.h		\
+    othello_cp_dp.h		\
+    disjointset.h		\
+    hashutil.cc	
 
 stg_ins_test_SOURCES =			\
 	fc_slab.cc fc_slab.h		\

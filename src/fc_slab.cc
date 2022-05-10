@@ -16,7 +16,7 @@
  */
 
 #include <fc_core.h>
-
+#include "ludo_cp_dp.h"
 extern struct settings settings;
 
 static uint32_t nfree_msinfoq;         /* # free memory slabinfo q */

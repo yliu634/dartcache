@@ -26,13 +26,13 @@ static void set_options(){
 #define FC_DAEMONIZE        true
 
     //#define FC_LOG_FILE         NULL
-#define FC_LOG_FILE         "/home/yu/test/log2"
+#define FC_LOG_FILE         "/home/yiliu/build/log"
 #define FC_LOG_DEFAULT      LOG_INFO
 #define FC_LOG_MIN          LOG_EMERG
 #define FC_LOG_MAX          LOG_PVERB
 
 #define FC_PORT             11211
-#define FC_ADDR             "0.0.0.0"
+#define FC_ADDR             "127.0.0.1"
 
 #define FC_HASH_POWER       ITEMX_HASH_POWER
 
@@ -46,11 +46,11 @@ static void set_options(){
     
     settings.daemonize = FC_DAEMONIZE;
 
-    settings.log_filename = FC_LOG_FILE;
+    settings.log_filename = (char *)FC_LOG_FILE;
     settings.verbose = 6;//11;//FC_LOG_DEFAULT;
 
     settings.port = FC_PORT;
-    settings.addr = FC_ADDR;
+    settings.addr = (char *)FC_ADDR;
     settings.hash_power = FC_HASH_POWER;
 
     settings.factor = FC_FACTOR;
@@ -62,7 +62,7 @@ static void set_options(){
     memset(settings.profile, 0, sizeof(settings.profile));
     settings.profile_last_id = SLABCLASS_MAX_ID;
 
-    settings.ssd_device = "/dev/sdc"; //NULL;
+    settings.ssd_device = "/dev/sdb"; //NULL;
 
     settings.server_id = FC_SERVER_ID;
     settings.server_n = FC_SERVER_N;
@@ -139,7 +139,7 @@ int put(char* key, int nkey, char* value, int vlen, int expiry, int flags){
     uint8_t  md[20];
     uint32_t hash;
 
-    uint8_t * tmp_key = key;
+    uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
     hash = sha1_hash(md);
     uint8_t cid;
@@ -167,7 +167,7 @@ int get(char* key, int nkey, char* value){
     struct itemx *itx;
     struct item *it;
 
-    uint8_t * tmp_key = key;
+    uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
     hash = sha1_hash(md);
     
@@ -190,7 +190,7 @@ int get(char* key, int nkey, char* value){
 int delete_test(char* key, int nkey){
     uint8_t  md[20];
     uint32_t hash;
-    uint8_t * tmp_key = key;
+    uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
     hash = sha1_hash(md);
     
@@ -275,19 +275,19 @@ int main(int argc, char** argv){
     set_options();
     fc_generate_profile();
     init();
-    char key[5]= "test1";
+    char key[5]= "test";
     //char value[3]="100";
     char *value=NULL;
     char *ret=NULL;
     int vl = 0;
     if (argc > 1){
-        printf("%u\n", strlen(argv[1]));
+        printf("%d\n", (int)strlen(argv[1]));
         vl =  strlen(argv[1]);
-        value = malloc((strlen(argv[1])+1) * sizeof(char));
-        ret = malloc((strlen(argv[1])+1) * sizeof(char));
+        value = (char *) malloc((strlen(argv[1])+1) * sizeof(char));
+        ret = (char *) malloc((strlen(argv[1])+1) * sizeof(char));
         memcpy(value, argv[1], strlen(argv[1]));
     }else{
-        ret = malloc(10 * sizeof(char));
+        ret = (char *) malloc(10 * sizeof(char));
     }
     
     if (get(key, 5, ret) == 1){

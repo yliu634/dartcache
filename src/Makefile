@@ -109,7 +109,8 @@ am_fatcache_OBJECTS = fc_core.$(OBJEXT) fc_connection.$(OBJEXT) \
 	fc_response.$(OBJEXT) fc_mbuf.$(OBJEXT) fc_signal.$(OBJEXT) \
 	fc_event.$(OBJEXT) fc_time.$(OBJEXT) fc_sha1.$(OBJEXT) \
 	fc_log.$(OBJEXT) fc_string.$(OBJEXT) fc_array.$(OBJEXT) \
-	fc_util.$(OBJEXT) fc_stats.$(OBJEXT) fc.$(OBJEXT)
+	fc_util.$(OBJEXT) fc_stats.$(OBJEXT) fc.$(OBJEXT) \
+	farmhash.$(OBJEXT) hashutil.$(OBJEXT)
 fatcache_OBJECTS = $(am_fatcache_OBJECTS)
 fatcache_LDADD = $(LDADD)
 am_stg_ins_test_OBJECTS = fc_slab.$(OBJEXT) fc_item.$(OBJEXT) \
@@ -317,7 +318,19 @@ fatcache_SOURCES = \
 	fc_util.cc fc_util.h		\
 	fc_stats.cc fc_stats.h		\
 	fc_queue.h			\
-	fc.cc
+	fc.cc		\
+	common.h		\
+    cuckoo_ht.h		\
+    debugbreak.h		\
+    farmhash.h		\
+    farmhash.cc		\
+    hash2.h			\
+    hashutil.h		\
+    lfsr64.h		\
+    ludo_cp_dp.h		\
+    othello_cp_dp.h		\
+    disjointset.h		\
+    hashutil.cc	
 
 stg_ins_test_SOURCES = \
 	fc_slab.cc fc_slab.h		\
@@ -420,6 +433,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/farmhash.Po
 include ./$(DEPDIR)/fc.Po
 include ./$(DEPDIR)/fc_array.Po
 include ./$(DEPDIR)/fc_client.Po
@@ -442,6 +456,7 @@ include ./$(DEPDIR)/fc_stats.Po
 include ./$(DEPDIR)/fc_string.Po
 include ./$(DEPDIR)/fc_time.Po
 include ./$(DEPDIR)/fc_util.Po
+include ./$(DEPDIR)/hashutil.Po
 include ./$(DEPDIR)/stg_ins_test.Po
 
 .cc.o:
