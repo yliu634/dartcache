@@ -73,7 +73,6 @@ item_get(uint8_t *key, uint8_t nkey, uint8_t cid, uint32_t ndata,
         log_warn("server error on allocating item in slab %"PRIu8, cid);
         return NULL;
     }
-
     it->magic = ITEM_MAGIC;
     /* offset and sid are initialized by slab_get_item */
     it->cid = cid;
@@ -88,9 +87,7 @@ item_get(uint8_t *key, uint8_t nkey, uint8_t cid, uint32_t ndata,
     log_debug(LOG_VERB, "get it '%.*s' at offset %"PRIu32" with cid %"PRIu8
               " expiry %u", it->nkey, item_key(it), it->offset, it->cid,
               expiry);
-
     itemx_putx(it->hash, it->md, it->sid, it->offset, expiry, ++cas_id);
-
     return it;
 }
 

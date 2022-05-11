@@ -201,7 +201,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -fPIC -fpermissive #--std=c++98
+CXXFLAGS = -fPIC -fpermissive
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -322,8 +322,7 @@ fatcache_SOURCES = \
 	common.h		\
     cuckoo_ht.h		\
     debugbreak.h		\
-    farmhash.h		\
-    farmhash.cc		\
+    farmhash.cc farmhash.h		\
     hash2.h			\
     hashutil.h		\
     lfsr64.h		\

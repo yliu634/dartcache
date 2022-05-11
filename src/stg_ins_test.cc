@@ -26,7 +26,7 @@ static void set_options(){
 #define FC_DAEMONIZE        true
 
     //#define FC_LOG_FILE         NULL
-#define FC_LOG_FILE         "/home/yiliu/build/log"
+#define FC_LOG_FILE         "./log"
 #define FC_LOG_DEFAULT      LOG_INFO
 #define FC_LOG_MIN          LOG_EMERG
 #define FC_LOG_MAX          LOG_PVERB
@@ -138,18 +138,15 @@ rstatus_t init(){
 int put(char* key, int nkey, char* value, int vlen, int expiry, int flags){
     uint8_t  md[20];
     uint32_t hash;
-
     uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
     hash = sha1_hash(md);
     uint8_t cid;
     struct item *it;
-    
     cid = item_slabcid(nkey, vlen);
     if (cid == SLABCLASS_INVALID_ID) {
         return -1;
     }
-
     itemx_removex(hash, md);
     it = item_get((uint8_t*)key, nkey, cid, vlen, time_reltime(expiry),
                   flags, md, hash);
@@ -271,11 +268,12 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
     memcpy(item_data(it), numstr, n);
     return 0;
 }
+
 int main(int argc, char** argv){
     set_options();
     fc_generate_profile();
     init();
-    char key[5]= "test";
+    char key[5]= "test1";
     //char value[3]="100";
     char *value=NULL;
     char *ret=NULL;
@@ -288,6 +286,7 @@ int main(int argc, char** argv){
         memcpy(value, argv[1], strlen(argv[1]));
     }else{
         ret = (char *) malloc(10 * sizeof(char));
+        value = "123";
     }
     
     if (get(key, 5, ret) == 1){

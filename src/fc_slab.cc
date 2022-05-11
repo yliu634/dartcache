@@ -226,6 +226,7 @@ slab_evict(void)
 
     sinfo = TAILQ_FIRST(&full_dsinfoq);
     nfull_dsinfoq--;
+        
     TAILQ_REMOVE(&full_dsinfoq, sinfo, tqe);
     ASSERT(!sinfo->mem);
     ASSERT(sinfo->addr < ndslab);
@@ -354,13 +355,14 @@ slab_drain(void)
     }
 
     status = slab_evict();
+    
     if (status != FC_OK) {
         return status;
     }
 
     ASSERT(!TAILQ_EMPTY(&free_dsinfoq));
     ASSERT(nfree_dsinfoq > 0);
-
+    
     return _slab_drain();
 }
 
@@ -439,7 +441,6 @@ slab_get_item(uint8_t cid)
         sinfo->cid = cid;
         /* mem is already initialized by slab_init */
         ASSERT(sinfo->mem == 1);
-
         /* init slab of partial sinfo */
         slab = (struct slab *) slab_from_maddr(sinfo->addr, false);
         slab->magic = SLAB_MAGIC;
@@ -458,7 +459,7 @@ slab_get_item(uint8_t cid)
     if (status != FC_OK) {
         return NULL;
     }
-
+    printf("54\n");
     return slab_get_item(cid);
 }
 

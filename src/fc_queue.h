@@ -133,9 +133,9 @@
 #endif
 
 #ifdef QUEUE_MACRO_SCRUB
-extern "C" {
+
 #define QMD_SAVELINK(name, link)    void **name = (void **)(void *)&(link)
-}
+
 #define TRASHIT(x) do {                                                 \
     (x) = (void *) NULL;                                                \
 } while (0)
