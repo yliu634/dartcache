@@ -151,7 +151,7 @@ int put(char* key, int nkey, char* value, int vlen, int expiry, int flags){
     }
 
     itemx_removex(hash, md);
-    it = item_get(key, nkey, cid, vlen, time_reltime(expiry),
+    it = item_get((uint8_t*)key, nkey, cid, vlen, time_reltime(expiry),
                   flags, md, hash);
     if (it == NULL) {
         return -1;
