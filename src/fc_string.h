@@ -19,7 +19,7 @@
 #define _FC_STRING_H_
 
 #include <string.h>
-#include <fc_core.h>
+#include "fc_core.h"
 
 struct string {
     uint32_t len;   /* string length */

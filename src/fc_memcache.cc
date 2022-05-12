@@ -17,8 +17,8 @@
 
 #include <ctype.h>
 
-#include <fc_core.h>
-#include <fc_memcache.h>
+#include "fc_core.h"
+#include "fc_memcache.h"
 
 /*
  * From memcache protocol specification:

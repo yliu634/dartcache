@@ -18,7 +18,7 @@
 #ifndef _FC_CLIENT_H_
 #define _FC_CLIENT_H_
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 bool client_active(struct conn *conn);
 void client_close(struct context *ctx, struct conn *conn);

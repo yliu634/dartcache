@@ -1,20 +1,20 @@
-//#include <fc_core.h>
+//#include "fc_core.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <fc_common.h>
+#include "fc_common.h"
 
-#include <fc_queue.h>
-#include <fc_log.h>
+#include "fc_queue.h"
+#include "fc_log.h"
 
 
-#include <fc_sha1.h>
-#include <fc_time.h>
-#include <fc_util.h>
+#include "fc_sha1.h"
+#include "fc_time.h"
+#include "fc_util.h"
 
-#include <fc_slab.h>
-#include <fc_itemx.h>
-#include <fc_item.h>
-#include <fc_settings.h>
+#include "fc_slab.h"
+#include "fc_itemx.h"
+#include "fc_item.h"
+#include "fc_settings.h"
 
 struct settings settings;          /* fatcache settings */
 

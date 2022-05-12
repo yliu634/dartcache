@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 extern struct string msg_strings[];
 

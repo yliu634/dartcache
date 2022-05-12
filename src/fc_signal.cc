@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 static struct signal signals[] = {
     { SIGUSR1, "SIGUSR1", 0,            signal_handler },

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 #define HASHSIZE(_n)    (1ULL << (_n))
 #define HASHMASK(_n)    (HASHSIZE(_n) - 1)

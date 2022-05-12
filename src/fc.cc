@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 #define FC_CHUNK_SIZE       ITEM_CHUNK_SIZE
 #define FC_SLAB_SIZE        SLAB_SIZE

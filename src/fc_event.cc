@@ -18,8 +18,8 @@
 #include <unistd.h>
 #include <sys/epoll.h>
 
-#include <fc_core.h>
-#include <fc_event.h>
+#include "fc_core.h"
+#include "fc_event.h"
 
 int
 event_init(struct context *ctx, int size)

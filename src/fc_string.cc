@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 /*
  * String (struct string) is a sequence of unsigned char objects terminated

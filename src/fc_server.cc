@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#include <fc_core.h>
-#include <fc_server.h>
+#include "fc_core.h"
+#include "fc_server.h"
 
 extern struct settings settings;
 

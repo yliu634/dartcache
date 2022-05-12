@@ -18,7 +18,7 @@
 #ifndef _FC_MEMCACHE_H_
 #define _FC_MEMCACHE_H_
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 #define strcrlf(m)                                                                          \
     (*(m) == '\r' && *((m) + 1) == '\n')

@@ -18,7 +18,7 @@
 #ifndef _FC_ITEM_H_
 #define _FC_ITEM_H_
 
-#include <fc_slab.h>
+#include "fc_slab.h"
 
 struct item {
     uint32_t          magic;      /* item magic (const) */

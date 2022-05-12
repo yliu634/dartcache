@@ -18,7 +18,7 @@
 #ifndef _FC_MESSAGE_H_
 #define _FC_MESSAGE_H_
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 typedef void (*msg_parse_t)(struct msg *);
 

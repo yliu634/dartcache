@@ -18,7 +18,7 @@
 #ifndef _FC_ARRAY_H_
 #define _FC_ARRAY_H_
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 typedef int (*array_compare_t)(const void *, const void *);
 typedef rstatus_t (*array_each_t)(void *, void *);

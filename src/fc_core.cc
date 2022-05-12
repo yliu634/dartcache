@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <fc_core.h>
-#include <fc_server.h>
+#include "fc_core.h"
+#include "fc_server.h"
 
 extern struct settings settings;
 

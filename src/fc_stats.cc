@@ -18,7 +18,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <fc_stats.h>
+
+#include "fc_stats.h"
 
 static stats_info st_info;
 static stats_info sc_st_info[SLABCLASS_MAX_ID+1];

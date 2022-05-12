@@ -19,9 +19,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <fc_core.h>
-#include <fc_event.h>
-#include <fc_stats.h>
+#include "fc_core.h"
+#include "fc_event.h"
+#include "fc_stats.h"
 
 extern struct string msg_strings[];
 

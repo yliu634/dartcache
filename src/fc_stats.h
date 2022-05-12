@@ -20,7 +20,7 @@
 
 #include <unistd.h>
 #include <stdint.h>
-#include <fc_core.h>
+#include "fc_core.h"
 
 typedef struct {
     uint8_t *data;

@@ -18,7 +18,7 @@
 #ifndef _FC_EVENT_H_
 #define _FC_EVENT_H_
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 int event_init(struct context *ctx, int size);
 void event_deinit(struct context *ctx);

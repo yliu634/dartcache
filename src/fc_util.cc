@@ -26,7 +26,7 @@
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 
-#include <fc_core.h>
+#include "fc_core.h"
 
 int
 fc_set_blocking(int sd)
