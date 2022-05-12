@@ -70,7 +70,7 @@ static void set_options(){
 }
 
 static rstatus_t
-fc_generate_profile(void)
+fc_generate_profile(void)   //generate ctable's size in each layer.
 {
     size_t *profile = settings.profile; /* slab profile */
     uint8_t id;                         /* slab class id */
@@ -90,7 +90,7 @@ fc_generate_profile(void)
         last_item_sz = item_sz;
         profile[id] = item_sz;
         id++;
-
+        //profile是按照系数算出来的每个class的大小;
         /* get the next item chunk size */
         item_sz *= settings.factor;
         if (item_sz == last_item_sz) {
@@ -120,12 +120,12 @@ rstatus_t init(){
         return status;
     }
     
-    status = itemx_init();
+    status = itemx_init();// how many itemx could be inited within memory.
     if (status != FC_OK) {
         return status;
     }
     
-    item_init();
+    item_init();// useless
 
     status = slab_init();
     if (status != FC_OK) {

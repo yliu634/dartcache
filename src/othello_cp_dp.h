@@ -8,7 +8,7 @@ using namespace std;
 
 /*template<class K, class V, uint8_t L, uint8_t DL>
 class DataPlaneOthello;*/
-namespace spotkv {
+
 template<class K, class V, uint8_t L, uint8_t DL,
     bool maintainDP, bool maintainDisjointSet, bool randomized>
 class ControlPlaneOthello;
@@ -1289,5 +1289,5 @@ public:
     return ControlPlaneOthello<K, bool, 0, false, true>::insert(k, true);
   }
 };
-}
+
 #endif

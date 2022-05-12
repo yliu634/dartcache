@@ -42,7 +42,6 @@
 // a good cuckoo path with less data movement (see
 // http://www.cs.cmu.edu/~dga/papers/cuckoo-eurosys14.pdf )
 
-namespace spotkv {
 
 template<class K>
 struct Ludo_PathEntry {  // waste space in this prototype. can be more efficient in memory
@@ -975,5 +974,5 @@ public:
   CuckooPathEntry visited_[kVisitedListSize];
   bool integrity = true;
 };
-}
+
 #endif

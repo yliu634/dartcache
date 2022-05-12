@@ -1,4 +1,4 @@
-bin_PROGRAMS = fatcache stg_ins_test
+bin_PROGRAMS = stg_ins_test fatcache 
 
 AM_CPPFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS = -g 

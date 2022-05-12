@@ -537,7 +537,7 @@ slab_init_ctable(void)
         c = &ctable[cid];
         c->nitem = slab_data_size() / profile[cid];
         c->size = profile[cid];
-        c->slack = slab_data_size() - (c->nitem * c->size);
+        c->slack = slab_data_size() - (c->nitem * c->size);//裕量,不够凑成一整个item了在该slab中;
         TAILQ_INIT(&c->partial_msinfoq);
         c->nmslab = 0;
         c->ndslab = 0;
