@@ -115,7 +115,8 @@ fatcache_OBJECTS = $(am_fatcache_OBJECTS)
 fatcache_LDADD = $(LDADD)
 am_stg_ins_test_OBJECTS = fc_slab.$(OBJEXT) fc_item.$(OBJEXT) \
 	fc_itemx.$(OBJEXT) fc_time.$(OBJEXT) fc_sha1.$(OBJEXT) \
-	fc_log.$(OBJEXT) fc_util.$(OBJEXT) stg_ins_test.$(OBJEXT)
+	fc_log.$(OBJEXT) fc_util.$(OBJEXT) stg_ins_test.$(OBJEXT) \
+	farmhash.$(OBJEXT) hashutil.$(OBJEXT)
 stg_ins_test_OBJECTS = $(am_stg_ins_test_OBJECTS)
 stg_ins_test_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -340,7 +341,18 @@ stg_ins_test_SOURCES = \
 	fc_log.cc fc_log.h		\
 	fc_util.cc fc_util.h		\
 	fc_queue.h			\
-    stg_ins_test.cc
+    stg_ins_test.cc			\
+	common.h		\
+    cuckoo_ht.h		\
+    debugbreak.h		\
+    farmhash.cc farmhash.h		\
+    hash2.h			\
+    hashutil.h		\
+    lfsr64.h		\
+    ludo_cp_dp.h		\
+    othello_cp_dp.h		\
+    disjointset.h		\
+    hashutil.cc	
 
 all: all-am
 

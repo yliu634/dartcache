@@ -1,7 +1,7 @@
 //#include "fc_core.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <cstring>
 #include "fc_common.h"
 
 #include "fc_queue.h"
@@ -15,6 +15,8 @@
 #include "fc_itemx.h"
 #include "fc_item.h"
 #include "fc_settings.h"
+
+#include "cuckoo_ht.h"
 
 struct settings settings;          /* fatcache settings */
 
@@ -143,11 +145,11 @@ int put(char* key, int nkey, char* value, int vlen, int expiry, int flags){
     hash = sha1_hash(md);
     uint8_t cid;
     struct item *it;
-    cid = item_slabcid(nkey, vlen);
+    cid = item_slabcid(nkey, vlen);//remain
     if (cid == SLABCLASS_INVALID_ID) {
         return -1;
     }
-    itemx_removex(hash, md);
+    itemx_removex(hash, md);//
     it = item_get((uint8_t*)key, nkey, cid, vlen, time_reltime(expiry),
                   flags, md, hash);
     if (it == NULL) {
@@ -284,11 +286,33 @@ int main(int argc, char** argv){
         value = (char *) malloc((strlen(argv[1])+1) * sizeof(char));
         ret = (char *) malloc((strlen(argv[1])+1) * sizeof(char));
         memcpy(value, argv[1], strlen(argv[1]));
-    }else{
+    } else {
         ret = (char *) malloc(10 * sizeof(char));
         value = "123";
     }
     
+
+    /*
+    CuckooHashTable<std::string, uint64_t> cci(1024);
+    char yyey[5] = "test2";
+    std::string ykey=yyey;
+    //printf("%s",ykey.c_str());
+    cci.insert((std::string)ykey, 5);
+    uint64_t bbi(0);
+    cci.lookUp(ykey, bbi);
+    printf("lookup %llu\n",bbi);
+
+    uint64_t bby(0);
+    std::string kkey = "test2";
+    cci.lookUp(kkey, bby);
+    printf("lookup %llu\n",bby);
+
+    uint64_t bbx(0);
+    cci.remove(kkey);
+    cci.lookUp(kkey, bbx);
+    printf("lookup %llu\n",bbx);
+    */
+
     if (get(key, 5, ret) == 1){
         printf("no data\n");
     }

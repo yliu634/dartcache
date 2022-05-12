@@ -16,7 +16,7 @@
  */
 
 #include "fc_core.h"
-#include "ludo_cp_dp.h"
+
 extern struct settings settings;
 
 static uint32_t nfree_msinfoq;         /* # free memory slabinfo q */
@@ -50,6 +50,7 @@ static uint32_t ndslab;                /* # disk slabs */
 static uint64_t nevict;
 static uint8_t *evictbuf;              /* evict buffer */
 static uint8_t *readbuf;               /* read buffer */
+
 
 /*
  * Return the maximum space available for item sized chunks in a given
@@ -459,7 +460,7 @@ slab_get_item(uint8_t cid)
     if (status != FC_OK) {
         return NULL;
     }
-    printf("54\n");
+    
     return slab_get_item(cid);
 }
 

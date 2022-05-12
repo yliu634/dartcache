@@ -52,6 +52,7 @@
 #include <list>
 #include <forward_list>
 
+#include "farmhash.h"
 #include "disjointset.h"
 #include "hash2.h"
 #include "lfsr64.h"

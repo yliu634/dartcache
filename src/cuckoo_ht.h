@@ -141,7 +141,7 @@ public:
   
   // Returns collided key if some key collides with the key being inserted;
   // returns null if the table is full; returns &k if inserted successfully.
-  inline const Key *insert(const Key &k, const Value &v, bool allowUpdate = false) {
+  inline const Key *insert(const Key &k, const Value &v, bool allowUpdate = true) {
     // Merged find and duplicate checking.
     uint32_t target_bucket;
     int target_slot = -1;

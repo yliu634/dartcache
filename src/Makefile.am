@@ -55,4 +55,15 @@ stg_ins_test_SOURCES =			\
 	fc_log.cc fc_log.h		\
 	fc_util.cc fc_util.h		\
 	fc_queue.h			\
-    stg_ins_test.cc
+    stg_ins_test.cc			\
+	common.h		\
+    cuckoo_ht.h		\
+    debugbreak.h		\
+    farmhash.cc farmhash.h		\
+    hash2.h			\
+    hashutil.h		\
+    lfsr64.h		\
+    ludo_cp_dp.h		\
+    othello_cp_dp.h		\
+    disjointset.h		\
+    hashutil.cc	

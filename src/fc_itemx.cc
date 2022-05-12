@@ -17,6 +17,8 @@
 
 #include "fc_core.h"
 
+#include "cuckoo_ht.h"
+
 #define HASHSIZE(_n)    (1ULL << (_n))
 #define HASHMASK(_n)    (HASHSIZE(_n) - 1)
 
@@ -32,6 +34,8 @@ static struct itemx_tqh free_itemxq; /* free itemx q */
 
 static struct itemx *istart;         /* itemx memory start */
 static struct itemx *iend;           /* itemx memory end */
+
+static CuckooHashTable <uint64_t, uint64_t> *cht;
 
 /*
  * Return true if the itemx has expired, otherwise return false. Itemx
@@ -143,6 +147,8 @@ itemx_init(void)
     }
     nalloc_itemx = n;
 
+    cht = new CuckooHashTable<uint64_t, uint64_t> (2<<20);
+
     return FC_OK;
 }
 
@@ -220,6 +226,9 @@ itemx_putx(uint32_t hash, uint8_t *md, uint32_t sid, uint32_t offset,
     nitx++;
     STAILQ_INSERT_HEAD(bucket, itx, tqe);
     slab_incr_chunks_by_sid(itx->sid, 1);
+
+    //uint64_t ckey = strtoull();
+    //cht.insert();
 }
 
 bool
