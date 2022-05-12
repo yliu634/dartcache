@@ -1,11 +1,11 @@
 //#include "fc_core.h"
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "fc_common.h"
 
 #include "fc_queue.h"
 #include "fc_log.h"
-
 
 #include "fc_sha1.h"
 #include "fc_time.h"
