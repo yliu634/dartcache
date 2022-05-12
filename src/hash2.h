@@ -148,5 +148,53 @@ public:
     return *(uint64_t*)h;
   }
 };
+
+
+class Hasher32Char {
+public:
+  uint32_t s;    //!< hash s.
+  
+  Hasher32Char()
+    : s(0xe2211) {
+  }
+  
+  explicit Hasher32Char(uint32_t _s)
+    : s(_s) {
+  }
+  
+  //! set bitmask and s
+  void setSeed(uint32_t _s) {
+    s = _s;
+  }
+  
+  /*
+  getBase(const uint8_t* k0) const {
+    //uint64_t *base;
+    return k0;
+  }
+  
+  template<class K1>
+  inline typename std::enable_if<std::is_same<K1, std::string>::value, uint64_t *>::type
+  getBase(const K &k0) const {
+    uint64_t *base;
+    return (uint64_t *) &k0[0];
+  }
+  
+  
+  getKeyByteLength(const K &k0) const {
+    return sizeof(K);
+  }
+  */
+  
+  inline uint32_t operator()(const char* k0, const size_t len) const {
+    //static_assert(sizeof(K) <= 32, "K length should be 32/64/96/128/160/192/224/256 bits");
+    
+    //uint64_t *base = getBase<K>(k0);
+    //const uint16_t keyByteLength = getKeyByteLength<K>(k0);
+    return farmhash::Hash32WithSeed((char *) k0, (size_t) len, s);
+//    return XXH32((void*) base, keyByteLength, s);
+  }
+};
+
 #endif
 

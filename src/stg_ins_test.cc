@@ -271,11 +271,11 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
     return 0;
 }
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
     set_options();
     fc_generate_profile();
     init();
-    char key[5]= "test1";
+    char key[5]= "12345";
     //char value[3]="100";
     char *value=NULL;
     char *ret=NULL;
@@ -290,28 +290,7 @@ int main(int argc, char** argv){
         ret = (char *) malloc(10 * sizeof(char));
         value = "123";
     }
-    
-
-    /*
-    CuckooHashTable<std::string, uint64_t> cci(1024);
-    char yyey[5] = "test2";
-    std::string ykey=yyey;
-    //printf("%s",ykey.c_str());
-    cci.insert((std::string)ykey, 5);
-    uint64_t bbi(0);
-    cci.lookUp(ykey, bbi);
-    printf("lookup %llu\n",bbi);
-
-    uint64_t bby(0);
-    std::string kkey = "test2";
-    cci.lookUp(kkey, bby);
-    printf("lookup %llu\n",bby);
-
-    uint64_t bbx(0);
-    cci.remove(kkey);
-    cci.lookUp(kkey, bbx);
-    printf("lookup %llu\n",bbx);
-    */
+      
 
     if (get(key, 5, ret) == 1){
         printf("no data\n");
@@ -344,3 +323,24 @@ int main(int argc, char** argv){
     
     return 0;
 }
+
+    /*
+    CuckooHashTable<uint64_t, uint64_t> cci(1024);
+    char *yyey = nullptr;
+    //strlen(yyey);
+    yyey = "123456";
+    uint64_t ykey = strtoull(yyey, nullptr, 10);
+    printf("oo %d\n",strlen(yyey));
+    printf("rr %lu\n",ykey);
+    cci.insert(ykey, 5);
+    uint64_t bbi(0);
+    cci.lookUp(ykey, bbi);
+    printf("lookup %llu\n",bbi);
+
+    uint64_t bby(0);
+    char xkey[6] = "123456";
+    uint64_t kkey = strtoull(xkey, nullptr, 10);
+    cci.lookUp(kkey, bby);
+    printf("lookup %llu\n",bby);
+    */
+

@@ -327,7 +327,6 @@ fatcache_SOURCES = \
     hash2.h			\
     hashutil.h		\
     lfsr64.h		\
-    ludo_cp_dp.h		\
     othello_cp_dp.h		\
     disjointset.h		\
     hashutil.cc	
@@ -349,7 +348,6 @@ stg_ins_test_SOURCES = \
     hash2.h			\
     hashutil.h		\
     lfsr64.h		\
-    ludo_cp_dp.h		\
     othello_cp_dp.h		\
     disjointset.h		\
     hashutil.cc	
