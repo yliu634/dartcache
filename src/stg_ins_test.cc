@@ -17,6 +17,7 @@
 #include "fc_settings.h"
 
 #include "cuckoo_ht.h"
+#include "hash2.h"
 
 struct settings settings;          /* fatcache settings */
 
@@ -292,6 +293,26 @@ int main(int argc, char** argv) {
     }
       
 
+    
+
+    CuckooHashTable<uint8_t*, uint64_t> cci(1024);
+    printf("num: %u\n",cci.BucketCount());
+    uint8_t *yyey = nullptr;
+    //strlen(yyey);
+    yyey = "123456";
+    cci.insert(yyey, 5, 64);
+    uint64_t bbi(0);
+    cci.lookUp(yyey, 5, bbi);
+    printf("lookup %llu\n",bbi);
+
+    uint64_t bby(0);
+    char xkey[6] = "123456";
+    cci.lookUp(xkey, 5, bby);
+    printf("lookup %llu\n",bby);
+    
+
+
+
     if (get(key, 5, ret) == 1){
         printf("no data\n");
     }
@@ -324,23 +345,21 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-    /*
-    CuckooHashTable<uint64_t, uint64_t> cci(1024);
-    char *yyey = nullptr;
-    //strlen(yyey);
-    yyey = "123456";
-    uint64_t ykey = strtoull(yyey, nullptr, 10);
-    printf("oo %d\n",strlen(yyey));
-    printf("rr %lu\n",ykey);
-    cci.insert(ykey, 5);
-    uint64_t bbi(0);
-    cci.lookUp(ykey, bbi);
-    printf("lookup %llu\n",bbi);
 
-    uint64_t bby(0);
-    char xkey[6] = "123456";
-    uint64_t kkey = strtoull(xkey, nullptr, 10);
-    cci.lookUp(kkey, bby);
-    printf("lookup %llu\n",bby);
+    /*
+    Hasher32Char h;
+    char key1[5] = "qwert";
+    printf("key1 len: %d\n", strlen(key1));
+    uint32_t has1 = h(key1, 5);
+    printf("has1: %u\n", has1);
+
+    char key2[5] = "qwert";
+    printf("key2 len: %d\n", strlen(key2));
+    uint32_t has2 = h(key2, 5);
+    printf("has2: %u\n", has2);
     */
+
+
+
+
 

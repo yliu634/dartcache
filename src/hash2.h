@@ -186,7 +186,7 @@ public:
   }
   */
   
-  inline uint32_t operator()(const char* k0, const size_t len) const {
+  inline uint32_t operator()(uint8_t* k0, const size_t len) const {
     //static_assert(sizeof(K) <= 32, "K length should be 32/64/96/128/160/192/224/256 bits");
     
     //uint64_t *base = getBase<K>(k0);
