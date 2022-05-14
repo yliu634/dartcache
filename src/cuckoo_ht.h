@@ -133,7 +133,68 @@ public:
     buckets_.clear();
     buckets_.resize(num_buckets_, empty_bucket);
   }
-  
+
+  void resizeCapacity() {
+    //targetCapacity = max(nKeys, max(targetCapacity, 256U));
+    
+    num_buckets_ = num_buckets_ << 1UL;
+    
+    oldBuckets = buckets_;
+    buckets_.resize(num_buckets_);
+    
+    if (num_buckets_ >= (1U << 30U)) {
+      throw runtime_error("Current design only support up to 4 billion key set size! ");
+    }
+  }
+
+  bool tryBuild() {
+    
+    //oldBuckets = buckets_;
+    for (auto &bucket: buckets_) {  // all buckets
+      bucket.occupiedMask = 0;
+    }
+    
+    bool succ = true;
+    
+    for (auto &bucket: oldBuckets) {  // all buckets
+      for (char slot = 0; slot < kSlotsPerBucket; ++slot) {
+        if (bucket.occupiedMask & (1 << slot)) {
+          int result = insertWhileRebuild(bucket.keys[slot], bucket.values[slot], false);   // rebuilding is always offline
+          if (result < 0)
+            succ = false;
+        }
+      }
+      if (!succ) break;
+    }
+    
+    return succ;
+  } 
+
+  bool build() {
+    while (true) {
+      int tryCount = 0;
+      
+      bool built;
+      do {
+        hchar32.setSeed(rand());
+        hfp32.setSeed(rand());
+        tryCount++;
+        if (tryCount > 2 && !(tryCount & (tryCount - 1))) {
+          //cout << "Try #" << tryCount << endl;
+        }
+        built = tryBuild();
+      } while ((!built) && (tryCount < 3));//MAX-rehash
+      
+      if (built) {
+        break;
+      } else {
+        resizeCapacity();
+      }
+    }
+    
+    return true;
+  }
+
   void changeBucket(uint32_t &h1, uint32_t const &tag) const {
     h1 = (uint32_t) (h1 ^ (tag * 0x5bd1e995));
     h1 = h1 & (num_buckets_ - 1);
@@ -164,7 +225,7 @@ public:
   
   // Returns collided key if some key collides with the key being inserted;
   // returns null if the table is full; returns &k if inserted successfully.
-  inline const uint32_t insert(Key k, const size_t len, const Value &v, bool allowUpdate = true) {
+  inline const int insert(Key k, const size_t len, const Value &v, bool allowUpdate = true) {
     // Merged find and duplicate checking.
     uint32_t target_bucket;
     int target_slot = -1;
@@ -205,14 +266,63 @@ public:
     // No space, perform cuckooInsert
     if (CuckooInsert(bucket, tag, v)) {
       //Clocker::count("Cuckoo cuckoo insert");
-      return tag;
+      return 1;
     } else {
       entryCount--;
-      //rebuild
-      return 0;
+      //resizeCapacity();
+      //build();
+      //insert(k, len, v, true);
+      return -1;
     }
   }
   
+  inline const int insertWhileRebuild(Key k, const size_t len, const Value &v, bool allowUpdate = true) {
+    // Merged find and duplicate checking.
+    uint32_t target_bucket;
+    int target_slot = -1;
+    entryCount++;
+    
+    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
+    uint32_t tag = hfp32(k,len);
+    for (int i = 0; i < kCandidateBuckets; i++) {
+      Bucket &bref = buckets_[bucket];
+      for (int slot = 0; slot < kSlotsPerBucket; slot++) {
+        if (bref.occupiedMask & (1ULL << slot)) {
+          if (tag == bref.keys[slot]) { // Duplicates are not allowed.
+            if (allowUpdate) {
+              target_bucket = bucket;
+              target_slot = slot;
+              break;
+            } else {
+              entryCount--;
+              return bref.keys[slot];
+            }
+          } else { continue; }
+        } else if (target_slot == -1) {
+          target_bucket = bucket;
+          target_slot = slot;
+          if (allowUpdate) break;
+        } else { continue; }
+      }
+      if (i != kCandidateBuckets - 1)
+        changeBucket(bucket, tag);
+    }
+    
+    if (target_slot != -1) {
+      //Clocker::count("Cuckoo direct insert");
+      InsertInternal(tag, v, target_bucket, target_slot);
+      return tag;
+    }
+    
+    // No space, perform cuckooInsert
+    if (CuckooInsert(bucket, tag, v)) {
+      //Clocker::count("Cuckoo cuckoo insert");
+      return 1;
+    } else {
+      return -1;
+    }
+  }
+
   inline bool remove(Key k, const size_t len) {
     uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k, len);
@@ -233,6 +343,9 @@ public:
   inline bool lookUp(Key k, const size_t len, Value &out) const {
     uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k, len);
+    //dont wanna write any more.
+    //while (true) {
+    //  uint8_t va1 = lock[bucket]
     for (int i = 0; i < kCandidateBuckets; ++i) {
       if (FindInBucket(tag, bucket, out)) 
           return true;
@@ -549,10 +662,11 @@ public:
   
   // Set upon initialization: num_entries / kLoadFactor / kSlotsPerBucket.
   uint32_t num_buckets_;
-  std::vector<Bucket> buckets_;
+  std::vector<Bucket> buckets_, oldBuckets;
   
   CuckooPathQueue cpq_;
   CuckooPathEntry visited_[kVisitedListSize];
+
 };
 
 
