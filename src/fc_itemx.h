@@ -18,7 +18,7 @@
 #ifndef _FC_ITEMX_H_
 #define _FC_ITEMX_H_
 
-#define ITEMX_HASH_POWER    20
+#define ITEMX_HASH_POWER   20
 
 struct itemx {
     STAILQ_ENTRY(itemx) tqe;    /* link in index / free q */
@@ -36,9 +36,10 @@ void itemx_deinit(void);
 
 bool itemx_empty(void);
 bool itemx_expired(struct itemx *itx);
-struct itemx *itemx_getx(uint32_t hash, uint8_t *md);
-void itemx_putx(uint32_t hash, uint8_t *md, uint32_t sid, uint32_t ioff, rel_time_t expiry, uint64_t cas);
-bool itemx_removex(uint32_t hash, uint8_t *md);
+bool itemx_getx(uint8_t* key, uint8_t nkey, uint32_t &sid, uint32_t &off);
+void itemx_putx(uint8_t* key, uint8_t nkey, uint32_t sid, uint32_t offset,
+           rel_time_t expiry, uint64_t cas);
+bool itemx_removex(uint8_t* key, uint8_t nkey);
 
 uint64_t itemx_nalloc(void);
 uint64_t itemx_nfree(void);

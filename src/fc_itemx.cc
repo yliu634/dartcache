@@ -35,7 +35,7 @@ static struct itemx_tqh free_itemxq; /* free itemx q */
 static struct itemx *istart;         /* itemx memory start */
 static struct itemx *iend;           /* itemx memory end */
 
-static CuckooHashTable <uint64_t, uint64_t> *cht;
+static CuckooHashTable <uint8_t*, uint64_t> *cht;
 
 /*
  * Return true if the itemx has expired, otherwise return false. Itemx
@@ -147,7 +147,7 @@ itemx_init(void)
     }
     nalloc_itemx = n;
 
-    cht = new CuckooHashTable<uint64_t, uint64_t> (2<<20);
+    cht = new CuckooHashTable<uint8_t*, uint64_t> (2<<20);
 
     return FC_OK;
 }
@@ -187,10 +187,10 @@ itemx_bucket(uint32_t hash)
     return bucket;
 }
 
-struct itemx *
-itemx_getx(uint32_t hash, uint8_t *md)
+bool
+itemx_getx(uint8_t* key, uint8_t nkey, uint32_t &sid, uint32_t &off)
 {
-    struct itemx_tqh *bucket;
+    /*struct itemx_tqh *bucket;
     struct itemx *itx;
 
     bucket = itemx_bucket(hash);
@@ -199,16 +199,22 @@ itemx_getx(uint32_t hash, uint8_t *md)
         if (memcmp(itx->md, md, sizeof(itx->md)) == 0) {
             break;
         }
+    }*/
+    uint64_t value(0);
+    bool status = cht->lookUp(key, nkey, value);
+    if (status) {
+        sid = (uint32_t) (value >> 32);
+        off = (uint32_t) (value & 0xffffffff);
+        return true;
     }
-
-    return itx;
+    return false;
 }
 
 void
-itemx_putx(uint32_t hash, uint8_t *md, uint32_t sid, uint32_t offset,
+itemx_putx(uint8_t* key, uint8_t nkey, uint32_t sid, uint32_t offset,
            rel_time_t expiry, uint64_t cas)
 {
-    struct itemx *itx;
+    /*struct itemx *itx;
     struct itemx_tqh *bucket;
 
     ASSERT(!itemx_empty());
@@ -223,33 +229,41 @@ itemx_putx(uint32_t hash, uint8_t *md, uint32_t sid, uint32_t offset,
     ASSERT(itemx_getx(hash, md) == NULL);
 
     bucket = itemx_bucket(hash);
-    nitx++;
     STAILQ_INSERT_HEAD(bucket, itx, tqe);
-    slab_incr_chunks_by_sid(itx->sid, 1);
+    */
 
-    //uint64_t ckey = strtoull();
-    //cht.insert();
+    nitx++;
+    uint64_t sidoff = (uint64_t) ((sid << 32) + (offset & 0xffffffff));
+    cht->insert(key, nkey, sidoff);
+    slab_incr_chunks_by_sid(sid, 1);
+
 }
 
 bool
-itemx_removex(uint32_t hash, uint8_t *md)
+itemx_removex(uint8_t* key, uint8_t nkey)
 {
-    struct itemx_tqh *bucket;
-    struct itemx *itx;
-
+    //struct itemx_tqh *bucket;
+    //struct itemx *itx;
+    /*
     itx = itemx_getx(hash, md);
     if (itx == NULL) {
         return false;
     }
 
     bucket = itemx_bucket(hash);
-    nitx--;
-    STAILQ_REMOVE(bucket, itx, itemx, tqe);
-    slab_incr_chunks_by_sid(itx->sid, -1);
+    */
+    uint64_t value;
+    bool status = cht->remove(key, nkey, value);
+    if (status) {
+        nitx--;
+        //STAILQ_REMOVE(bucket, itx, itemx, tqe);
+        uint32_t sid = (uint32_t) ((value>>32) & 0xffffffff);
+        slab_incr_chunks_by_sid(sid, -1);
+        return true;
+    }
+    //itemx_put(itx); //release itx //unhelpful because cuckoo table is set fixed to begin with.
 
-    itemx_put(itx);
-
-    return true;
+    return false;
 }
 
 uint64_t

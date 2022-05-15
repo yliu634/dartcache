@@ -50,15 +50,17 @@ class CuckooHashTable {
     return (uint32_t) (((uint64_t) x * (uint64_t) y) >> 32);
   }
   
-  inline uint32_t fast_map_to_buckets(uint32_t x) const {
+  inline vector<uint32_t> fast_map_to_buckets(uint32_t x, const uint32_t tag) const {
     // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
     // using Lemire's alternative to modulo reduction:
     // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     // Instead of x % N, use (x * N) >> 64.
     
     //return multiply_high_u32(x, num_buckets_);
-
-    return (x & (num_buckets_ - 1));
+    x = x & (num_buckets_ - 1);
+    uint32_t x1 = (uint32_t) (x ^ (tag * 0x5bd1e995));
+    x1 = x1 & (num_buckets_ - 1);
+    return {x, x1};
 
   }
 
@@ -195,31 +197,25 @@ public:
     return true;
   }
 
-  void changeBucket(uint32_t &h1, uint32_t const &tag) const {
+  /*void changeBucket(uint32_t &h1, uint32_t const &tag) const {
     h1 = (uint32_t) (h1 ^ (tag * 0x5bd1e995));
     h1 = h1 & (num_buckets_ - 1);
-  }
+  }*/
 
   pair<int, int> locate(Key k, const size_t len) const {
     //for (int i = 0; i < kCandidateBuckets; ++i) {
-    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));   //h1
-    const Bucket &bref = buckets_[bucket];
     uint32_t tag = hfp32(k, len);
-
-    for (int slot = 0; slot < kSlotsPerBucket; slot++) {
-      if ((bref.occupiedMask & (1U << slot)) && (bref.keys[slot] == tag)) {
-        return make_pair((int) bucket, slot);
-      }
-    }
-
-    changeBucket(bucket, tag);
-    const Bucket &bref1 = buckets_[bucket];
-    for (int slot = 0; slot < kSlotsPerBucket; slot++) {
-      if ((bref1.occupiedMask & (1U << slot)) && (bref1.keys[slot] == tag)) {
-        return make_pair((int) bucket, slot);
-      }
-    }
+    vector<uint32_t> bucket = fast_map_to_buckets(hchar32(k, len), tag);   //h1
     
+    for (int i = 0; i < kCandidateBuckets; i++) {
+      const Bucket &bref = buckets_[bucket[i]];
+      for (int slot = 0; slot < kSlotsPerBucket; slot++) {
+        if ((bref.occupiedMask & (1U << slot)) && (bref.keys[slot] == tag)) {
+          return make_pair((int) bucket, slot);
+        }
+      }
+    }
+       
     return make_pair(-1, -1);
   }
   
@@ -231,15 +227,16 @@ public:
     int target_slot = -1;
     entryCount++;
     
-    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k,len);
+    vector<uint32_t> bucket = fast_map_to_buckets(hchar32(k, len), tag);
     for (int i = 0; i < kCandidateBuckets; i++) {
-      Bucket &bref = buckets_[bucket];
-      for (int slot = 0; slot < kSlotsPerBucket; slot++) {
+      Bucket &bref = buckets_[bucket[i]];
+      for (int slot = 0; slot < kSlotsPerBucket; slot ++) {
         if (bref.occupiedMask & (1ULL << slot)) {
           if (tag == bref.keys[slot]) { // Duplicates are not allowed.
             if (allowUpdate) {
-              target_bucket = bucket;
+              
+              target_bucket = bucket[i];
               target_slot = slot;
               break;
             } else {
@@ -248,13 +245,13 @@ public:
             }
           } else { continue; }
         } else if (target_slot == -1) {
-          target_bucket = bucket;
+          
+          target_bucket = bucket[i];
           target_slot = slot;
+          
           if (allowUpdate) break;
         } else { continue; }
       }
-      if (i != kCandidateBuckets - 1)
-        changeBucket(bucket, tag);
     }
     
     if (target_slot != -1) {
@@ -264,7 +261,7 @@ public:
     }
     
     // No space, perform cuckooInsert
-    if (CuckooInsert(bucket, tag, v)) {
+    if (CuckooInsert(bucket[0], tag, v)) {
       //Clocker::count("Cuckoo cuckoo insert");
       return 1;
     } else {
@@ -276,64 +273,15 @@ public:
     }
   }
   
-  inline const int insertWhileRebuild(Key k, const size_t len, const Value &v, bool allowUpdate = true) {
-    // Merged find and duplicate checking.
-    uint32_t target_bucket;
-    int target_slot = -1;
-    entryCount++;
-    
-    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
-    uint32_t tag = hfp32(k,len);
-    for (int i = 0; i < kCandidateBuckets; i++) {
-      Bucket &bref = buckets_[bucket];
-      for (int slot = 0; slot < kSlotsPerBucket; slot++) {
-        if (bref.occupiedMask & (1ULL << slot)) {
-          if (tag == bref.keys[slot]) { // Duplicates are not allowed.
-            if (allowUpdate) {
-              target_bucket = bucket;
-              target_slot = slot;
-              break;
-            } else {
-              entryCount--;
-              return bref.keys[slot];
-            }
-          } else { continue; }
-        } else if (target_slot == -1) {
-          target_bucket = bucket;
-          target_slot = slot;
-          if (allowUpdate) break;
-        } else { continue; }
-      }
-      if (i != kCandidateBuckets - 1)
-        changeBucket(bucket, tag);
-    }
-    
-    if (target_slot != -1) {
-      //Clocker::count("Cuckoo direct insert");
-      InsertInternal(tag, v, target_bucket, target_slot);
-      return tag;
-    }
-    
-    // No space, perform cuckooInsert
-    if (CuckooInsert(bucket, tag, v)) {
-      //Clocker::count("Cuckoo cuckoo insert");
-      return 1;
-    } else {
-      return -1;
-    }
-  }
-
-  inline bool remove(Key k, const size_t len) {
-    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
+  inline bool remove(Key k, const size_t len, Value &v) {
     uint32_t tag = hfp32(k, len);
+    vector <uint32_t> bucket = fast_map_to_buckets(hchar32(k, len), tag);
+    
     for (int i = 0; i < kCandidateBuckets; i++) {
-      //uint32_t bucket = fast_map_to_buckets(h[i](k));
-      if (RemoveInBucket(tag, bucket)) {
+      if (RemoveInBucket(tag, bucket[i], v)) {
         entryCount--;
         return true;
       }
-      if (i != kCandidateBuckets - 1)
-        changeBucket(bucket, tag);
     }
     
     return false;
@@ -341,16 +289,15 @@ public:
   
   // Returns true if found. Sets *out = value.
   inline bool lookUp(Key k, const size_t len, Value &out) const {
-    uint32_t bucket = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k, len);
+    vector<uint32_t> bucket = fast_map_to_buckets(hchar32(k, len), tag);
+    
     //dont wanna write any more.
     //while (true) {
     //  uint8_t va1 = lock[bucket]
     for (int i = 0; i < kCandidateBuckets; ++i) {
-      if (FindInBucket(tag, bucket, out)) 
+      if (FindInBucket(tag, bucket[i], out)) 
           return true;
-      if (i != kCandidateBuckets - 1)
-        changeBucket(bucket, tag);
     }
     
     return false;
@@ -360,12 +307,12 @@ public:
     double worst = MAXFLOAT;
     int worstBid = -1, worstSid = -1;
     
-    uint32_t bid = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k, len);
-
+    vector<uint32_t> bid = fast_map_to_buckets(hchar32(k, len), tag);
+    
     for (int i = 0; i < kCandidateBuckets; ++i) {
       //uint32_t bid = fast_map_to_buckets(h[i](k));
-      Bucket &bref = buckets_[bid];
+      Bucket &bref = buckets_[bid[i]];
       
       for (int s = 0; s < kSlotsPerBucket; s++) {
         if (!(bref.occupiedMask & (1U << s)) || bref.keys[s] == tag) {
@@ -377,34 +324,29 @@ public:
         double e = eval(bref.keys[s], bref.values[s]);
         if (e < worst) {
           worst = e;
-          worstBid = bid;
+          worstBid = bid[i];
           worstSid = s;
         }
       }
-      if (i != kCandidateBuckets - 1)
-        changeBucket(bid, tag);
     }
     
     InsertInternal(tag, v, worstBid, worstSid);
   }
   
   inline void changeValue(Key k, const size_t &len, Value v) {
-    uint32_t b = fast_map_to_buckets(hchar32(k, len));
     uint32_t tag = hfp32(k, len);
-
+    vector <uint32_t> b = fast_map_to_buckets(hchar32(k, len), tag);
+    
     for (int i = 0; i < kCandidateBuckets; i++) {
       //uint32_t b = fast_map_to_buckets(h[i](k));
       
-      Bucket &bref = buckets_[b];
+      Bucket &bref = buckets_[b[i]];
       for (int i = 0; i < kSlotsPerBucket; i++) {
         if ((bref.occupiedMask & (1U << i)) && (bref.keys[i] == tag)) {
           bref.values[i] = v;
           return;
         }
       }
-      if (i != kCandidateBuckets - 1)
-        changeBucket(b, tag);
-
     }
   }
   
@@ -559,12 +501,12 @@ public:
   
   // For the associative cuckoo table, check all of the slots in
   // the bucket to see if the key is present.
-  inline int RemoveInBucket(const uint32_t &tag, uint32_t b) {
+  inline int RemoveInBucket(const uint32_t &tag, uint32_t b, Value &v) {
     Bucket &bref = buckets_[b];
     for (int i = 0; i < kSlotsPerBucket; i++) {
       if ((bref.occupiedMask & (1U << i)) && bref.keys[i] == tag) {
         bref.occupiedMask ^= 1U << i;
-        
+        v = bref.values[i];
         return true;
       }
     }
@@ -608,13 +550,12 @@ public:
     int visited_end = -1;
     cpq_.reset();
     
+    vector<uint32_t> b = fast_map_to_buckets(bucket, tag);
+    for (int i = 0; i < kCandidateBuckets; ++i) {
 
-    //for (int i = 0; i < kCandidateBuckets; ++i) {
       //uint32_t bucket = fast_map_to_buckets(h[i](k));
-      cpq_.push_back({bucket, 1, -1, -1}); // Note depth starts at 1.
-      changeBucket(bucket, tag);
-      cpq_.push_back({bucket, 1, -1, -1});
-    //}
+      cpq_.push_back({b[i], 1, -1, -1}); // Note depth starts at 1.
+    }
     
     while (!cpq_.empty()) {
       CuckooPathEntry entry = cpq_.pop_front();

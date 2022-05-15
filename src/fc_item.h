@@ -31,7 +31,7 @@ struct item {
     uint32_t          flags;      /* flags opaque to the server */
     uint8_t           md[20];     /* key message digest */
     uint32_t          hash;       /* key hash */
-    uint8_t           end[1];     /* item data */
+    uint8_t           end[1];     /* item data *///key+value;
 };
 
 #define ITEM_MAGIC      0xfeedface

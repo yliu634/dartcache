@@ -172,11 +172,12 @@ req_filter(struct context *ctx, struct conn *conn, struct msg *msg)
 static void
 req_process_get(struct context *ctx, struct conn *conn, struct msg *msg)
 {
-    struct itemx *itx;
+    //struct itemx *itx;
     struct item *it;
-
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL) {
+    uint32_t sid(0), offset(0);
+    //uint8_t* key, uint8_t nkey, uint32_t &sid, uint32_t &off
+    bool status = itemx_getx(msg->key_start, (uint8_t)(msg->key_end - msg->key_start), sid, offset);
+    if (status == false) {
         msg_type_t type;
 
         /*
@@ -192,16 +193,17 @@ req_process_get(struct context *ctx, struct conn *conn, struct msg *msg)
         rsp_send_status(ctx, conn, msg, type);
         return;
     }
-
+    /* yiliu comments here.
     if (itemx_expired(itx)) {
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_FOUND);
         return;
-    }
+    }*/
+
     /*
      * On a hit, we read the item with address [sid, offset] and respond
      * with item value if the item hasn't expired yet.
      */
-    it = slab_read_item(itx->sid, itx->offset);
+    it = slab_read_item(sid, offset);
     if (it == NULL) {
         rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
         return;
@@ -209,22 +211,22 @@ req_process_get(struct context *ctx, struct conn *conn, struct msg *msg)
 
     STATS_HIT_INCR(msg->type);
     SC_STATS_INCR(it->cid, msg->type);
-    rsp_send_value(ctx, conn, msg, it, itx->cas);
+    rsp_send_value(ctx, conn, msg, it, 0);//itx->cas); //yiliu
 }
 
 static void
 req_process_delete(struct context *ctx, struct conn *conn, struct msg *msg)
 {
     uint8_t cid;
-    struct itemx *itx;
-
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL) {
+    //struct itemx *itx;
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(msg->key_start, (uint8_t)(msg->key_end - msg->key_start), sid, offset);
+    if (status == false) {
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_FOUND);
         return;
     }
-    cid = slab_get_cid(itx->sid);
-    itemx_removex(msg->hash, msg->md);
+    cid = slab_get_cid(sid);
+    itemx_removex(msg->key_start, msg->key_end - msg->key_start);
 
     STATS_HIT_INCR(msg->type);
     SC_STATS_INCR(cid, msg->type);
@@ -246,7 +248,7 @@ req_process_set(struct context *ctx, struct conn *conn, struct msg *msg)
         return;
     }
 
-    itemx_removex(msg->hash, msg->md);
+    itemx_removex(key, nkey);
 
     it = item_get(key, nkey, cid, msg->vlen, time_reltime(msg->expiry),
                   msg->flags, msg->md, msg->hash);
@@ -265,10 +267,11 @@ static void
 req_process_add(struct context *ctx, struct conn *conn, struct msg *msg)
 {
     struct itemx *itx;
-
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(msg->key_start, (uint8_t)(msg->key_end - msg->key_start), sid, offset);
+    if (status == false) {
     /* add, adds only if the mapping is not present */
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx != NULL && !itemx_expired(itx)) {
+    //if (itx != NULL && !itemx_expired(itx)) {
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_STORED);
         return;
     }
@@ -280,10 +283,12 @@ static void
 req_process_replace(struct context *ctx, struct conn *conn, struct msg *msg)
 {
     struct itemx *itx;
-
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(msg->key_start, (uint8_t)(msg->key_end - msg->key_start), sid, offset);
+    if (status == false) {
     /*  replace, only replaces if the mapping is present */
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL || itemx_expired(itx)) {
+    //itx = itemx_getx(msg->hash, msg->md);
+    //if (itx == NULL || itemx_expired(itx)) {
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_STORED);
         return;
     }
@@ -300,10 +305,12 @@ req_process_version(struct context *ctx, struct conn *conn, struct msg *msg)
 static void
 req_process_cas(struct context *ctx, struct conn *conn, struct msg *msg)
 {
-    struct itemx *itx;
-
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL) {
+    //struct itemx *itx;
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(msg->key_start, (uint8_t)(msg->key_end - msg->key_start), sid, offset);
+    if (status == false) {
+    //itx = itemx_getx(msg->hash, msg->md);
+    //if (itx == NULL) {
         /*
          * NOT_FOUND indicates that the item you are trying to store
          * with a cas does not exist.
@@ -312,14 +319,12 @@ req_process_cas(struct context *ctx, struct conn *conn, struct msg *msg)
         return;
     }
 
-    if (itx->cas != msg->cas) {
-        /*
-         * EXISTS indicates that the item you are trying to store with
-         * a cas has been modified since you last fetched it.
-         */
+    /*if (itx->cas != msg->cas) {
+        //EXISTS indicates that the item you are trying to store with
+        //a cas has been modified since you last fetched it.
         rsp_send_status(ctx, conn, msg, MSG_RSP_EXISTS);
         return;
-    }
+    }*/
 
     STATS_HIT_INCR(msg->type);
     req_process_set(ctx, conn, msg);
@@ -337,15 +342,18 @@ req_process_concat(struct context *ctx, struct conn *conn, struct msg *msg)
     nkey = (uint8_t)(msg->key_end - msg->key_start);
 
     /* 1). look up existing itemx */
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL || itemx_expired(itx)) {
+    //itx = itemx_getx(msg->hash, msg->md);
+    //if (itx == NULL || itemx_expired(itx)) {
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(msg->key_start, nkey, sid, offset);
+    if (status == false) {
         /* 2a). miss -> return NOT_STORED */
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_STORED);
         return;
     }
 
     /* 2b). hit -> read existing item into oit */
-    oit = slab_read_item(itx->sid, itx->offset);
+    oit = slab_read_item(sid, offset);
     if (oit == NULL) {
         rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
         return;
@@ -359,7 +367,7 @@ req_process_concat(struct context *ctx, struct conn *conn, struct msg *msg)
     }
 
     /* 3). remove existing itemx of oit */
-    itemx_removex(msg->hash, msg->md);
+    itemx_removex(key, nkey);
 
     /* 4). alloc new item that can hold ndata worth of bytes */
     it = item_get(key, nkey, cid, ndata, time_reltime(msg->expiry),
@@ -404,15 +412,18 @@ req_process_num(struct context *ctx, struct conn *conn, struct msg *msg)
     nkey = (uint8_t)(msg->key_end - msg->key_start);
 
     /* 1). look up existing itemx */
-    itx = itemx_getx(msg->hash, msg->md);
-    if (itx == NULL || itemx_expired(itx)) {
+    //itx = itemx_getx(msg->hash, msg->md);
+    //if (itx == NULL || itemx_expired(itx)) {
+    uint32_t sid(0), offset(0);
+    bool res = itemx_getx(key, nkey, sid, offset);
+    if (res == false) {
         /* 2a). miss -> return NOT_FOUND */
         rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_FOUND);
         return;
     }
 
     /* 2b). hit -> read existing item into it */
-    it = slab_read_item(itx->sid, itx->offset);
+    it = slab_read_item(sid, offset);
     if (it == NULL) {
         rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
         return;
@@ -426,7 +437,7 @@ req_process_num(struct context *ctx, struct conn *conn, struct msg *msg)
     }
 
     /* 4). remove existing itemx of it */
-    itemx_removex(msg->hash, msg->md);
+    itemx_removex(key, nkey); //yiliu
 
     /* 5). compute the new incr/decr number nnum and numstr */
     if (msg->type == MSG_REQ_INCR) {

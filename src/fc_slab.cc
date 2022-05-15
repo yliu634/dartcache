@@ -250,9 +250,10 @@ slab_evict(void)
     /* evict all items from the slab */
     for (c = &ctable[slab->cid], idx = 0; idx < c->nitem; idx++) {
         struct item *it = slab_to_item(slab, idx, c->size, true);
-        if (itemx_getx(it->hash, it->md) != NULL) {
-            itemx_removex(it->hash, it->md);
-        }
+        /*if (itemx_getx(it->end, it->nkey)) {
+            itemx_removex(it->end, it->nkey, it->sid, it->offset);
+        }*/
+        itemx_removex(it->end, it->nkey);
     }
 
     log_debug(LOG_DEBUG, "evict slab at disk (sid %"PRIu32", addr %"PRIu32")",
@@ -413,14 +414,14 @@ slab_get_item(uint8_t cid)
 
     ASSERT(cid >= SLABCLASS_MIN_ID && cid < nctable);
     c = &ctable[cid];
-
+    /*
     if (itemx_empty()) {
         status = slab_evict();
         if (status != FC_OK) {
             return NULL;
         }
     }
-
+    */
     if (!TAILQ_EMPTY(&c->partial_msinfoq)) {
         return _slab_get_item(cid);
     }

@@ -144,24 +144,26 @@ int put(char* key, int nkey, char* value, int vlen, int expiry, int flags){
     uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
     hash = sha1_hash(md);
+
     uint8_t cid;
     struct item *it;
     cid = item_slabcid(nkey, vlen);//remain
     if (cid == SLABCLASS_INVALID_ID) {
         return -1;
     }
-    itemx_removex(hash, md);//
+
+    itemx_removex(key, nkey);
     it = item_get((uint8_t*)key, nkey, cid, vlen, time_reltime(expiry),
                   flags, md, hash);
     if (it == NULL) {
-        return -1;
+        return 0;
     }
     memcpy(item_data(it), value, (size_t)(vlen));
-    return 0;
+    return 1;
 }
 
 int get(char* key, int nkey, char* value){
-    uint8_t  md[20];
+    /*uint8_t  md[20];
     uint32_t hash;
 
     struct itemx *itx;
@@ -177,18 +179,25 @@ int get(char* key, int nkey, char* value){
     }
     if (itemx_expired(itx)) {
         return 2;
+    }*/
+
+    struct item *it;
+    uint32_t sid(0), offset(0);
+    bool status = itemx_getx(key, nkey, sid, offset);
+    if (status) {
+        it = slab_read_item(sid, offset);
+        if (it == NULL) {
+            //rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
+            return -1;
+        }
+        memcpy(value, item_data(it), it->ndata);
+        return 1;
     }
-    it = slab_read_item(itx->sid, itx->offset);
-    if (it == NULL) {
-        //        rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
-        return -1;
-    }
-    memcpy(value, item_data(it), it->ndata);
     return 0;
 }
 
 int delete_test(char* key, int nkey){
-    uint8_t  md[20];
+    /*uint8_t  md[20];
     uint32_t hash;
     uint8_t * tmp_key = (uint8_t *) key;
     sha1(tmp_key, nkey, md);
@@ -203,7 +212,10 @@ int delete_test(char* key, int nkey){
         return 0;
     }
     cid = slab_get_cid(itx->sid);
-    itemx_removex(hash, md);   
+    */
+    bool status = itemx_removex((uint8_t*) key, (uint8_t) nkey);   
+    if (status) 
+        return 1;
     return 0;
 }
 
@@ -211,7 +223,7 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
     rstatus_t status;
     uint8_t *pkey, nkey, cid;
     struct item *it;
-    struct itemx *itx;
+    //struct itemx *itx;
     uint64_t cnum;
     int64_t nnum;
     char numstr[FC_UINT64_MAXLEN];
@@ -225,16 +237,20 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
     sha1(pkey, nkey, md);
     hash = sha1_hash(md);
     
-    /* 1). look up existing itemx */
+    /* 1). look up existing itemx 
     itx = itemx_getx(hash, md);
     if (itx == NULL || itemx_expired(itx)) {
-        /* 2a). miss -> return NOT_FOUND */
+        // 2a). miss -> return NOT_FOUND 
         //rsp_send_status(ctx, conn, msg, MSG_RSP_NOT_FOUND);
         return -1;
-    }
+    }*/
+
+    //1)
+    uint32_t sid(0), offset(0);
+    itemx_getx(pkey, nkey, sid, offset);
 
     /* 2b). hit -> read existing item into it */
-    it = slab_read_item(itx->sid, itx->offset);
+    it = slab_read_item(sid, offset);
     if (it == NULL) {
         //rsp_send_error(ctx, conn, msg, MSG_RSP_SERVER_ERROR, errno);
         return -2;
@@ -248,7 +264,7 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
     }
 
     /* 4). remove existing itemx of it */
-    itemx_removex(hash, md);
+    itemx_removex(pkey, nkey);
 
     /* 5). compute the new incr/decr number nnum and numstr */
     nnum = cnum + num;
@@ -273,9 +289,11 @@ int num(char *src_key, int src_key_len, int num, int expiry, int flags){
 }
 
 int main(int argc, char** argv) {
+
     set_options();
     fc_generate_profile();
     init();
+
     char key[5]= "12345";
     //char value[3]="100";
     char *value=NULL;
@@ -293,14 +311,12 @@ int main(int argc, char** argv) {
     }
       
 
-    
-
     /*CuckooHashTable<uint8_t*, uint64_t> cci(1024);
     printf("num: %u\n",cci.BucketCount());
     uint8_t *yyey = nullptr;
     uint64_t bbi(0);
     yyey = (uint8_t *) malloc(8 * sizeof(char));
-    for (uint32_t nn = 123456; nn < 125456; nn++) {
+    for (uint32_t nn = 123456; nn < 124456; nn++) {
         //uint32_t nn = 123456;
         sprintf((char *) yyey, "%d", nn);
         //printf("yyey: %s len:%d\n",yyey, strlen(yyey));
@@ -308,7 +324,8 @@ int main(int argc, char** argv) {
         //cci.lookUp(yyey, 6, bbi);
         //printf("yyey: %s value: %lu\n",yyey, bbi);
     }
-    for (uint32_t nn = 123456; nn < 125456; nn++) {
+    
+    for (uint32_t nn = 123456; nn < 124456; nn++) {
         //uint32_t nn = 123456;
         sprintf((char *) yyey, "%d", nn);
         //printf("yyey: %s len:%d\n",yyey, strlen(yyey));
@@ -316,39 +333,37 @@ int main(int argc, char** argv) {
         cci.lookUp(yyey, 6, bbi);
         printf("yyey: %s value: %lu\n",yyey, bbi);
     }
-    */
+  */  
+
 
     /*
-    cci.insert(yyey, 5, 64);
-    uint64_t bbi(0);
-    cci.lookUp(yyey, 5, bbi);
-    printf("lookup %llu\n",bbi);
-
-    uint64_t bby(0);
-    char xkey[6] = "123456";
-    cci.lookUp(xkey, 5, bby);
-    printf("lookup %llu\n",bby);
+    no data
+    set data ok
+    get data 123
+    delete no data
+    set data ok
+    get data: 123
+    num data ok
     */
 
-
-    #if 0
-    if (get(key, 5, ret) == 1){
+    #if 1
+    if (get(key, 5, ret) == 0){
         printf("no data\n");
     }
-    if (put(key, 5, value, strlen(value), 0, 1) == 0){
+    if (put(key, 5, value, strlen(value), 0, 1) == 1){
         printf("set data ok\n");
     }
-    if (get(key, 5, ret) == 0){
+    if (get(key, 5, ret) == 1){
         printf("get data %s\n", ret);
     }
     delete_test(key, 5);
-    if (get(key, 5, ret) == 1){
+    if (get(key, 5, ret) == 0){
         printf("delete no data\n");
     }
-    if (put(key, 5, value, strlen(value), 0, 1) == 0){
+    if (put(key, 5, value, strlen(value), 0, 1) == 1){
         printf("set data ok\n");
     }
-    if (get(key, 5, ret) == 1){
+    if (get(key, 5, ret) == 0){
         printf("error, no data\n");
     }else{
         printf("get data: %s\n", ret);
