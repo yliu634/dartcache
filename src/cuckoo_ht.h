@@ -225,7 +225,7 @@ public:
     // Merged find and duplicate checking.
     uint32_t target_bucket;
     int target_slot = -1;
-    entryCount++;
+    entryCount++; 
     
     uint32_t tag = hfp32(k,len);
     vector<uint32_t> bucket = fast_map_to_buckets(hchar32(k, len), tag);
